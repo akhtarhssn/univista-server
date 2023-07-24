@@ -27,13 +27,21 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-
     // server code start
     const usersCollection = client.db("univistaDB").collection("users");
     const collegesCollection = client.db("univistaDB").collection("colleges");
     const bookingsCollection = client.db("univistaDB").collection("bookings");
+
+    app.get("/colleges", async (req, res) => {
+      const result = await collegesCollection.find().toArray();
+      res.send(result);
+    });
+    app.get("/colleges/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await collegesCollection.findOne(query);
+      res.send(result);
+    });
 
     app.put("/users/:email", async (req, res) => {
       const email = req.params.email;
@@ -52,14 +60,20 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/colleges", async (req, res) => {
-      const result = await collegesCollection.find().toArray();
-      res.send(result);
-    });
-    app.get("/colleges/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await collegesCollection.findOne(query);
+    app.put("/admission/:email", async (req, res) => {
+      const email = req.params.email;
+      const admission = req.body;
+      const query = { email: email };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: admission,
+      };
+
+      const result = await bookingsCollection.updateOne(
+        query,
+        updatedDoc,
+        options
+      );
       res.send(result);
     });
 
