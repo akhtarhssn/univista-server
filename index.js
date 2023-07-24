@@ -77,6 +77,14 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/admission/:email", async (req, res) => {
+      const userEmail = req.params.email;
+      const query = { email: userEmail };
+
+      const result = await bookingsCollection.find(query);
+      res.send(result);
+    });
+
     // server code end
 
     // Send a ping to confirm a successful connection
